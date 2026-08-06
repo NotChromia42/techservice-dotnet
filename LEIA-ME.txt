@@ -1,0 +1,195 @@
+TECHSERVICE API — VERSÃO 0
+GUIA RÁPIDO PARA EXTRAIR, INSTALAR, EXECUTAR E VALIDAR
+
+OBJETIVO
+Executar uma API mínima em ASP.NET Core com:
+- Endpoint GET /
+- Resposta em JSON
+- Swagger disponível em /swagger
+
+============================================================
+1. CRIAR A PASTA DE TRABALHO
+============================================================
+
+No Windows, crie a pasta:
+
+C:\Projetos\TechService
+
+Pode criar pelo Explorador de Ficheiros ou pelo PowerShell:
+
+mkdir C:\Projetos\TechService
+
+============================================================
+2. COLOCAR O FICHEIRO ZIP NA PASTA
+============================================================
+
+Copie o ficheiro:
+
+TechService_V0.zip
+
+para:
+
+C:\Projetos\TechService
+
+============================================================
+3. EXTRAIR O ZIP
+============================================================
+
+No Explorador de Ficheiros:
+
+1. Clique com o botão direito em TechService_V0.zip.
+2. Escolha "Extrair Tudo...".
+3. Confirme a pasta C:\Projetos\TechService.
+4. Clique em "Extrair".
+
+Depois da extração, deve existir:
+
+C:\Projetos\TechService\TechService.Api
+
+============================================================
+4. ABRIR A PASTA NO VISUAL STUDIO CODE
+============================================================
+
+1. Abra o Visual Studio Code.
+2. Selecione File > Open Folder.
+3. Abra:
+
+C:\Projetos\TechService\TechService.Api
+
+4. Confirme que aparecem os ficheiros:
+
+Program.cs
+TechService.Api.csproj
+appsettings.json
+Properties
+
+============================================================
+5. ABRIR O TERMINAL DO VS CODE
+============================================================
+
+No VS Code:
+
+Terminal > New Terminal
+
+Atalho:
+
+Ctrl + Shift + `
+
+Confirme que o terminal está dentro da pasta:
+
+C:\Projetos\TechService\TechService.Api
+
+============================================================
+6. VERIFICAR O .NET
+============================================================
+
+Execute:
+
+dotnet --version
+
+Deve aparecer uma versão 9.x ou compatível com net9.0.
+
+Se o comando não funcionar, instale o .NET SDK antes de continuar.
+
+============================================================
+7. INSTALAR/RESTAURAR AS DEPENDÊNCIAS
+============================================================
+
+Execute:
+
+dotnet restore
+
+Resultado esperado:
+
+Restore succeeded.
+
+O comando instala as dependências definidas no ficheiro:
+
+TechService.Api.csproj
+
+Incluindo o pacote do Swagger.
+
+============================================================
+8. COMPILAR O PROJETO
+============================================================
+
+Execute:
+
+dotnet build
+
+Resultado esperado:
+
+Build succeeded.
+0 Error(s)
+
+============================================================
+9. EXECUTAR A API
+============================================================
+
+Execute:
+
+dotnet run
+
+Resultado esperado:
+
+Now listening on: http://localhost:5000
+Application started.
+
+Não feche o terminal enquanto estiver a testar a API.
+
+============================================================
+10. VALIDAR O ENDPOINT NO NAVEGADOR
+============================================================
+
+Abra no navegador:
+
+http://localhost:5000
+
+Resposta esperada:
+
+{
+  "mensagem": "Olá! Bem-vindo à API TechService - Versão 0",
+  "versao": "V0",
+  "estado": "API mínima em funcionamento"
+}
+
+============================================================
+11. VALIDAR NO SWAGGER
+============================================================
+
+Abra no navegador:
+
+http://localhost:5000/swagger
+
+No Swagger:
+
+1. Abra o endpoint GET /.
+2. Clique em "Try it out".
+3. Clique em "Execute".
+4. Confirme o código 200.
+5. Confirme a resposta JSON.
+
+============================================================
+12. PARAR A API
+============================================================
+
+Volte ao terminal e pressione:
+
+Ctrl + C
+
+============================================================
+CHECKLIST FINAL
+============================================================
+
+[ ] O ZIP foi extraído.
+[ ] A pasta TechService.Api foi aberta no VS Code.
+[ ] dotnet --version funcionou.
+[ ] dotnet restore terminou sem erros.
+[ ] dotnet build terminou sem erros.
+[ ] dotnet run iniciou a API.
+[ ] http://localhost:5000 respondeu.
+[ ] http://localhost:5000/swagger abriu.
+[ ] GET / devolveu 200 OK.
+
+RESULTADO
+A Versão 0 está concluída quando o endpoint GET / responde no navegador e no Swagger.
