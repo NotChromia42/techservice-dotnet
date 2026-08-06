@@ -1,63 +1,65 @@
-TECHSERVICE API — VERSÃO 0
+TECHSERVICE API — VERSÃO 1
 GUIA RÁPIDO PARA EXTRAIR, INSTALAR, EXECUTAR E VALIDAR
 
 OBJETIVO
-Executar uma API mínima em ASP.NET Core com:
-- Endpoint GET /
+Executar a API ASP.NET Core ligada ao MySQL remoto com:
+- GET /
+- GET /api/clientes
+- Listagem apenas de clientes com status = 1
 - Resposta em JSON
-- Swagger disponível em /swagger
+- Swagger em /swagger
 
 ============================================================
 1. CRIAR A PASTA DE TRABALHO
 ============================================================
 
-No Windows, crie a pasta:
+No Windows, crie:
 
-C:\Projetos\TechService
+C:\Projetos\TechService_V1
 
-Pode criar pelo Explorador de Ficheiros ou pelo PowerShell:
+Pelo PowerShell:
 
-mkdir C:\Projetos\TechService
+mkdir C:\Projetos\TechService_V1
 
 ============================================================
-2. COLOCAR O FICHEIRO ZIP NA PASTA
+2. COLOCAR O ZIP NA PASTA
 ============================================================
 
-Copie o ficheiro:
+Copie:
 
-TechService_V0.zip
+TechService_V1.zip
 
 para:
 
-C:\Projetos\TechService
+C:\Projetos\TechService_V1
 
 ============================================================
 3. EXTRAIR O ZIP
 ============================================================
 
-No Explorador de Ficheiros:
-
-1. Clique com o botão direito em TechService_V0.zip.
+1. Clique com o botão direito em TechService_V1.zip.
 2. Escolha "Extrair Tudo...".
-3. Confirme a pasta C:\Projetos\TechService.
+3. Confirme a pasta C:\Projetos\TechService_V1.
 4. Clique em "Extrair".
 
-Depois da extração, deve existir:
+Depois deve existir:
 
-C:\Projetos\TechService\TechService.Api
+C:\Projetos\TechService_V1\TechService.Api
 
 ============================================================
-4. ABRIR A PASTA NO VISUAL STUDIO CODE
+4. ABRIR NO VISUAL STUDIO CODE
 ============================================================
 
 1. Abra o Visual Studio Code.
 2. Selecione File > Open Folder.
 3. Abra:
 
-C:\Projetos\TechService\TechService.Api
+C:\Projetos\TechService_V1\TechService.Api
 
-4. Confirme que aparecem os ficheiros:
+Confirme que aparecem:
 
+Data\MySqlConnectionFactory.cs
+Models\Cliente.cs
 Program.cs
 TechService.Api.csproj
 appsettings.json
@@ -75,9 +77,9 @@ Atalho:
 
 Ctrl + Shift + `
 
-Confirme que o terminal está dentro da pasta:
+O terminal deve estar em:
 
-C:\Projetos\TechService\TechService.Api
+C:\Projetos\TechService_V1\TechService.Api
 
 ============================================================
 6. VERIFICAR O .NET
@@ -89,28 +91,25 @@ dotnet --version
 
 Deve aparecer uma versão 9.x ou compatível com net9.0.
 
-Se o comando não funcionar, instale o .NET SDK antes de continuar.
-
 ============================================================
-7. INSTALAR/RESTAURAR AS DEPENDÊNCIAS
+7. RESTAURAR AS DEPENDÊNCIAS
 ============================================================
 
 Execute:
 
 dotnet restore
 
+Este comando instala os pacotes:
+
+- MySqlConnector
+- Swashbuckle.AspNetCore
+
 Resultado esperado:
 
 Restore succeeded.
 
-O comando instala as dependências definidas no ficheiro:
-
-TechService.Api.csproj
-
-Incluindo o pacote do Swagger.
-
 ============================================================
-8. COMPILAR O PROJETO
+8. COMPILAR
 ============================================================
 
 Execute:
@@ -135,47 +134,102 @@ Resultado esperado:
 Now listening on: http://localhost:5000
 Application started.
 
-Não feche o terminal enquanto estiver a testar a API.
+Não feche o terminal enquanto estiver a testar.
 
 ============================================================
-10. VALIDAR O ENDPOINT NO NAVEGADOR
+10. VALIDAR O ENDPOINT INICIAL
 ============================================================
 
-Abra no navegador:
+Abra:
 
 http://localhost:5000
 
-Resposta esperada:
+Deve aparecer um JSON indicando:
 
-{
-  "mensagem": "Olá! Bem-vindo à API TechService - Versão 0",
-  "versao": "V0",
-  "estado": "API mínima em funcionamento"
-}
+- versão V1
+- ligação ao MySQL
+- endpoint GET /api/clientes
 
 ============================================================
-11. VALIDAR NO SWAGGER
+11. VALIDAR A LISTAGEM DE CLIENTES
 ============================================================
 
-Abra no navegador:
+Abra:
+
+http://localhost:5000/api/clientes
+
+Resultado esperado:
+
+- Código HTTP 200
+- Array JSON
+- Apenas clientes com status = 1
+- Campos reais da tabela clientes
+
+Exemplo:
+
+[
+  {
+    "idCliente": 1,
+    "nome": "Cliente Exemplo",
+    "email": "cliente@email.com",
+    "telefone": "912345678",
+    "status": 1,
+    "createdAt": "2026-01-01T10:00:00",
+    "updatedAt": null,
+    "deletedAt": null
+  }
+]
+
+============================================================
+12. VALIDAR NO SWAGGER
+============================================================
+
+Abra:
 
 http://localhost:5000/swagger
 
 No Swagger:
 
-1. Abra o endpoint GET /.
+1. Abra GET /api/clientes.
 2. Clique em "Try it out".
 3. Clique em "Execute".
 4. Confirme o código 200.
-5. Confirme a resposta JSON.
+5. Confirme a lista JSON.
+
+Também pode testar GET /.
 
 ============================================================
-12. PARAR A API
+13. PARAR A API
 ============================================================
 
-Volte ao terminal e pressione:
+No terminal, pressione:
 
 Ctrl + C
+
+============================================================
+ERROS MAIS COMUNS
+============================================================
+
+ERRO: dotnet não é reconhecido
+SOLUÇÃO: instalar/reparar o .NET SDK e reabrir o VS Code.
+
+ERRO: Access denied for user
+SOLUÇÃO: confirmar utilizador e palavra-passe em appsettings.json.
+
+ERRO: Unable to connect / timeout
+SOLUÇÃO: confirmar Internet, host aulaslab.com e porta 3306.
+
+ERRO: Table 'techservice.clientes' doesn't exist
+SOLUÇÃO: confirmar que Database=techservice e que a tabela clientes existe.
+
+ERRO: endereço já está em uso
+SOLUÇÃO: parar outra API com Ctrl+C ou executar:
+
+dotnet run --urls=http://localhost:5001
+
+Depois usar:
+
+http://localhost:5001/swagger
 
 ============================================================
 CHECKLIST FINAL
@@ -187,9 +241,10 @@ CHECKLIST FINAL
 [ ] dotnet restore terminou sem erros.
 [ ] dotnet build terminou sem erros.
 [ ] dotnet run iniciou a API.
-[ ] http://localhost:5000 respondeu.
-[ ] http://localhost:5000/swagger abriu.
-[ ] GET / devolveu 200 OK.
+[ ] GET / respondeu.
+[ ] GET /api/clientes devolveu 200 OK.
+[ ] A resposta contém apenas clientes ativos.
+[ ] O Swagger abriu e executou GET /api/clientes.
 
 RESULTADO
-A Versão 0 está concluída quando o endpoint GET / responde no navegador e no Swagger.
+A Versão 1 está concluída quando GET /api/clientes consulta a base techservice no servidor aulaslab.com e devolve os clientes ativos em JSON.
