@@ -198,8 +198,9 @@ app.MapDelete("/api/clientes/{id:int}", async (int id, MySqlConnectionFactory fa
 
 app.MapGet("/api/equipamentos", async (MySqlConnectionFactory factory) =>
 {
+
     const string sql = """
-        SELECT id_equipamento, tipo, marca, modelo, numero_serie, observacoes, status, created_at, updated_at, deleted_at
+        SELECT id_equipamento, id_cliente, tipo, marca, modelo, numero_serie, observacoes, status, created_at, updated_at, deleted_at
         FROM equipamentos
         WHERE status != 0
         ORDER BY id_equipamento DESC;
@@ -225,8 +226,9 @@ app.MapGet("/api/equipamentos", async (MySqlConnectionFactory factory) =>
 
 app.MapGet("/api/equipamentos/{id:int}", async (int id, MySqlConnectionFactory factory) =>
 {
+    // 💡 ADICIONADO id_cliente NA CONSULTA SQL
     const string sql = """
-        SELECT id_equipamento, tipo, marca, modelo, numero_serie, observacoes, status, created_at, updated_at, deleted_at
+        SELECT id_equipamento, id_cliente, tipo, marca, modelo, numero_serie, observacoes, status, created_at, updated_at, deleted_at
         FROM equipamentos
         WHERE id_equipamento = @id AND status != 0;
         """;
@@ -476,7 +478,7 @@ app.MapPost("/api/ordens-servico", async (OrdemServicoDTO dto, MySqlConnectionFa
         var newId = Convert.ToInt32(await command.ExecuteScalarAsync());
         return Results.Created($"/api/ordens-servico/{newId}", new { id_ordem = newId, mensagem = "Ordem de Serviço criada com sucesso!" });
     }
-    catch (MySqlException ex) when (ex.Number == 1452) // FK errada no id_equipamento
+    catch (MySqlException ex) when (ex.Number == 1452)
     {
         return Results.BadRequest(new { mensagem = "O Equipamento associado (id_equipamento) não existe." });
     }
@@ -546,7 +548,7 @@ app.MapPut("/api/ordens-servico/{id:int}", async (int id, OrdemServicoDTO dto, M
 .Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status404NotFound);
 
-// DELETE (Soft Delete via deleted_at)
+// DELETE
 app.MapDelete("/api/ordens-servico/{id:int}", async (int id, MySqlConnectionFactory factory) =>
 {
     const string sql = """
@@ -602,6 +604,10 @@ static Equipamento MapReaderToEquipamento(MySqlDataReader reader)
     return new Equipamento
     {
         IdEquipamento = reader.GetInt32(reader.GetOrdinal("id_equipamento")),
+        
+       
+        IdCliente = reader.GetInt32(reader.GetOrdinal("id_cliente")),
+
         Tipo = reader.GetString(reader.GetOrdinal("tipo")),
         Marca = reader.GetString(reader.GetOrdinal("marca")),
         Modelo = reader.GetString(reader.GetOrdinal("modelo")),

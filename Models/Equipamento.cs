@@ -4,6 +4,8 @@ public class Equipamento
 {
     public int IdEquipamento { get; set; }
 
+    public int IdCliente { get; set; }
+
     public string Tipo { get; set; } = string.Empty;
 
     public string Marca { get; set; } = string.Empty;
