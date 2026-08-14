@@ -4,20 +4,20 @@ using TechService.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuração do Swagger/OpenAPI - Swagger Desabilitado já que não é necessário para situações de produção, mas pode ser habilitado para desenvolvimento local.
-//builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-// }
+// Configuração do Swagger/OpenAPI
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Factory para gerir conexões MySQL reutilizáveis
 builder.Services.AddSingleton<MySqlConnectionFactory>();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 
 // -----------------------------------------------------------------------------
@@ -253,14 +253,14 @@ app.MapGet("/api/equipamentos/{id:int}", async (int id, MySqlConnectionFactory f
 
 app.MapPost("/api/equipamentos", async (EquipamentoDTO dto, MySqlConnectionFactory factory) =>
 {
-    if (string.IsNullOrWhiteSpace(dto.Tipo) || string.IsNullOrWhiteSpace(dto.Marca) || string.IsNullOrWhiteSpace(dto.Modelo) || string.IsNullOrWhiteSpace(dto.NumeroSerie))
+    if (dto.IdCliente <= 0 || string.IsNullOrWhiteSpace(dto.Tipo) || string.IsNullOrWhiteSpace(dto.Marca) || string.IsNullOrWhiteSpace(dto.Modelo) || string.IsNullOrWhiteSpace(dto.NumeroSerie))
     {
-        return Results.BadRequest(new { mensagem = "Os campos 'Tipo', 'Marca', 'Modelo' e 'NumeroSerie' são obrigatórios." });
+        return Results.BadRequest(new { mensagem = "Os campos 'IdCliente', 'Tipo', 'Marca', 'Modelo' e 'NumeroSerie' são obrigatórios." });
     }
 
     const string sql = """
-        INSERT INTO equipamentos (tipo, marca, modelo, numero_serie, observacoes, status, created_at)
-        VALUES (@tipo, @marca, @modelo, @numero_serie, @observacoes, 1, NOW());
+        INSERT INTO equipamentos (id_cliente, tipo, marca, modelo, numero_serie, observacoes, status, created_at)
+        VALUES (@id_cliente, @tipo, @marca, @modelo, @numero_serie, @observacoes, 1, NOW());
         SELECT LAST_INSERT_ID();
         """;
 
@@ -268,6 +268,7 @@ app.MapPost("/api/equipamentos", async (EquipamentoDTO dto, MySqlConnectionFacto
     await connection.OpenAsync();
 
     await using var command = new MySqlCommand(sql, connection);
+    command.Parameters.AddWithValue("@id_cliente", dto.IdCliente);
     command.Parameters.AddWithValue("@tipo", dto.Tipo);
     command.Parameters.AddWithValue("@marca", dto.Marca);
     command.Parameters.AddWithValue("@modelo", dto.Modelo);
@@ -283,6 +284,10 @@ app.MapPost("/api/equipamentos", async (EquipamentoDTO dto, MySqlConnectionFacto
     {
         return Results.BadRequest(new { mensagem = "Já existe um equipamento com este Número de Série." });
     }
+    catch (MySqlException ex) when (ex.Number == 1452)
+    {
+        return Results.BadRequest(new { mensagem = "O Cliente associado (id_cliente) não existe." });
+    }
 })
 .WithName("CriarEquipamento")
 .WithSummary("Criar um novo equipamento")
@@ -291,14 +296,15 @@ app.MapPost("/api/equipamentos", async (EquipamentoDTO dto, MySqlConnectionFacto
 
 app.MapPut("/api/equipamentos/{id:int}", async (int id, EquipamentoDTO dto, MySqlConnectionFactory factory) =>
 {
-    if (string.IsNullOrWhiteSpace(dto.Tipo) || string.IsNullOrWhiteSpace(dto.Marca) || string.IsNullOrWhiteSpace(dto.Modelo) || string.IsNullOrWhiteSpace(dto.NumeroSerie))
+    if (dto.IdCliente <= 0 || string.IsNullOrWhiteSpace(dto.Tipo) || string.IsNullOrWhiteSpace(dto.Marca) || string.IsNullOrWhiteSpace(dto.Modelo) || string.IsNullOrWhiteSpace(dto.NumeroSerie))
     {
-        return Results.BadRequest(new { mensagem = "Os campos 'Tipo', 'Marca', 'Modelo' e 'NumeroSerie' são obrigatórios." });
+        return Results.BadRequest(new { mensagem = "Os campos 'IdCliente', 'Tipo', 'Marca', 'Modelo' e 'NumeroSerie' são obrigatórios." });
     }
 
     const string sql = """
         UPDATE equipamentos
-        SET tipo = @tipo,
+        SET id_cliente = @id_cliente,
+            tipo = @tipo,
             marca = @marca,
             modelo = @modelo,
             numero_serie = @numero_serie,
@@ -312,6 +318,7 @@ app.MapPut("/api/equipamentos/{id:int}", async (int id, EquipamentoDTO dto, MySq
 
     await using var command = new MySqlCommand(sql, connection);
     command.Parameters.AddWithValue("@id", id);
+    command.Parameters.AddWithValue("@id_cliente", dto.IdCliente);
     command.Parameters.AddWithValue("@tipo", dto.Tipo);
     command.Parameters.AddWithValue("@marca", dto.Marca);
     command.Parameters.AddWithValue("@modelo", dto.Modelo);
@@ -332,6 +339,10 @@ app.MapPut("/api/equipamentos/{id:int}", async (int id, EquipamentoDTO dto, MySq
     catch (MySqlException ex) when (ex.Number == 1062)
     {
         return Results.BadRequest(new { mensagem = "Número de Série já pertence a outro equipamento." });
+    }
+    catch (MySqlException ex) when (ex.Number == 1452)
+    {
+        return Results.BadRequest(new { mensagem = "O Cliente associado (id_cliente) não existe." });
     }
 })
 .WithName("AtualizarEquipamento")
